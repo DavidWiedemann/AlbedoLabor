@@ -1,0 +1,239 @@
+  
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>Messwerte</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+   
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid black;
+    }
+   
+    #chart {
+      width: 400px;
+      height: 400px;
+      margin-top: 20px;
+      position: relative;
+    }
+   
+    .point {
+      width: 8px;
+      height: 8px;
+      background-color: blue;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    [class^="point-label-"]{
+      font-size: 12px;
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      white-space: nowrap; /* Hinzugefügt: Kein Zeilenumbruch in der Beschriftung */
+    }
+
+    #point-0, #point-1, #point-2 {
+        background-color:red !important;
+    }
+   
+    .axis {
+      position: absolute;
+      background-color: black;
+    }
+   
+    .x-axis {
+      width: 100%;
+      height: 2px;
+      bottom: 0;
+    }
+   
+    .y-axis {
+      width: 2px;
+      height: 100%;
+      left: 0;
+    }
+   
+        .arrow {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      transform: rotate(90deg);
+      background: linear-gradient(to top right, black, transparent);
+    }
+   
+    .x-axis .arrow {
+      bottom: -5px;
+      left: calc(100% - 5px);
+      transform: rotate(220deg);
+    }
+   
+    .y-axis .arrow {
+      top: -9px;
+      left: -4px;
+      transform: rotate(135deg);
+    }
+ 
+    .x-axis-label {
+      position: absolute;
+      bottom: -20px;
+      font-size: 12px;
+      text-align: center;
+      width: 20px;
+    }
+ 
+    .y-axis-label {
+      position: absolute;
+      top: -8pdx;
+      left: -40px;
+      font-size: 12px;
+      text-align: right;
+      width: 30px;
+    }
+
+    .y-axis-label.text {
+        writing-mode: vertical-lr;    
+        transform: rotate(180deg);
+        position: relative;
+        left: -4em;
+    }
+
+    .x-axis-label.text {
+	    white-space: nowrap;        
+        left: calc(82% - 10px);
+        position: relative;
+    }
+
+    #chart {
+        position: absolute;
+        left: 2.5em;
+    }
+  </style>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <h1>Messwerte</h1>
+ 
+  <table>
+    <tbody>
+      <tr>
+        <th>Zeit in Minuten</th>
+        <td>2</td>
+        <td>4</td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <th>Wassermenge im Messzylinder mit weißem Trichter in Milliliter</th>
+        <td><input type="number" name="y1" id="y1" /></td>
+        <td><input type="number" name="y2" id="y2" /></td>
+        <td><input type="number" name="y3" id="y3" /></td>
+      </tr>
+      <tr>
+        <th>Wassermenge im Messzylinder mit schwarzem Trichter in Milliliter</th>
+        <td><input type="number" name="y4" id="y4" /></td>
+        <td><input type="number" name="y5" id="y5" /></td>
+        <td><input type="number" name="y6" id="y6" /></td>
+      </tr>
+    </tbody>
+  </table>
+ 
+  <button onclick="plotPoints()">Punkte anzeigen</button>
+  <button onclick="resetEntries()">Punkte löschen</button> <!-- Hinzugefügter Reset-Knopf -->
+ <button onclick="downloadImage()">Bild herunterladen</button>
+  <div id="chart">
+    <div class="axis x-axis">
+      <div class="arrow"></div>
+     
+      <div class="x-axis-label" style="left: calc(20% - 10px);">2</div>
+      <div class="x-axis-label" style="left: calc(40% - 10px);">4</div>
+      <div class="x-axis-label" style="left: calc(60% - 10px);">6</div>
+      <div class="x-axis-label" style="left: calc(80% - 10px);">8</div>
+      <div class="x-axis-label" style="left: calc(100% - 10px);">10</div>
+      <div class="x-axis-label text">Zeit in Minuten</div>
+    </div>
+    <div class="axis y-axis">
+      <div class="arrow"></div>
+      <div class="y-axis-label">10</div> <!-- Geänderte y-Achsenbeschriftung -->
+      <div class="y-axis-label" style="top: calc(20% - 6px);">8</div> <!-- Geänderte y-Achsenbeschriftung -->
+      <div class="y-axis-label" style="top: calc(40% - 6px);">6</div> <!-- Geänderte y-Achsenbeschriftung -->
+      <div class="y-axis-label" style="top: calc(60% - 6px);">4</div> <!-- Geänderte y-Achsenbeschriftung -->
+      <div class="y-axis-label" style="top: calc(80% - 6px);">2</div> <!-- Geänderte y-Achsenbeschriftung -->
+     
+      <div class="y-axis-label text" style="top: calc(10% - 10px);">Wasserstand in Milliliter</div> <!-- Neue y-Achsenbeschriftung -->
+    </div>
+  </div>
+ 
+<script>
+  function plotPoints() {
+    var points = [
+      { x: 2, y: parseFloat(document.getElementById('y1').value) },
+      { x: 4, y: parseFloat(document.getElementById('y2').value) },
+      { x: 6, y: parseFloat(document.getElementById('y3').value) },
+      { x: 2, y: parseFloat(document.getElementById('y4').value) },
+      { x: 4, y: parseFloat(document.getElementById('y5').value) },
+      { x: 6, y: parseFloat(document.getElementById('y6').value) }
+    ];
+
+    var chart = document.getElementById('chart');
+    var chartWidth = chart.offsetWidth;
+    var chartHeight = chart.offsetHeight;
+
+    var xAxis = document.querySelector('.x-axis');
+    xAxis.style.bottom = '0';
+    xAxis.style.width = chartWidth + 'px';
+
+    var yAxis = document.querySelector('.y-axis');
+    yAxis.style.left = '0';
+    yAxis.style.height = chartHeight + 'px';
+
+    var xAxisArrow = xAxis.querySelector('.arrow');
+    xAxisArrow.style.left = 'calc(100% - 5px)';
+
+    var yAxisArrow = yAxis.querySelector('.arrow');
+    yAxisArrow.style.top = '-5px';
+
+    for (var i = 0; i < points.length; i++) {
+      // Begrenze die Werte auf den ersten Quadranten
+      if (points[i].x >= 0 && points[i].y >= 0) {
+        var point = document.createElement('div');
+        point.className = 'point';
+        point.id = 'point-' + i;
+        point.style.left = (points[i].x / 10) * chartWidth + 'px'; // Geänderter Divisor für x-Koordinate
+        point.style.bottom = (points[i].y / 10) * chartHeight + 'px'; // Geänderter Divisor für y-Koordinate
+
+        var pointLabel = document.createElement('div');
+        pointLabel.className = 'point-label-' + i;
+        pointLabel.textContent = '(' + points[i].x + '| ' + points[i].y + ')';
+
+        point.appendChild(pointLabel);
+        chart.appendChild(point);
+      }
+    }
+  }
+
+  function downloadImage() {
+    html2canvas(document.body).then(function (canvas) {
+      var link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'diagramm.png';
+      link.click();
+    });
+  }
+
+  function resetEntries() {
+    // Entferne alle Punkte aus dem Chart
+    var chart = document.getElementById('chart');
+    var points = chart.getElementsByClassName('point');
+    while (points.length > 0) {
+      points[0].parentNode.removeChild(points[0]);
+    }
+  }
+</script>
+
+</body>
+</html>
